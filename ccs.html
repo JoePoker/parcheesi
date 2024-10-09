@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang=&quot;en&quot; >
+
+<head>
+  <meta charset=&quot;UTF-8&quot;>
+  
+
+    <link rel=&quot;apple-touch-icon&quot; type=&quot;image/png&quot; href=&quot;https://cpwebassets.codepen.io/assets/favicon/apple-touch-icon-5ae1a0698dcc2402e9712f7d01ed509a57814f994c660df9f7a952f3060705ee.png&quot; />
+
+    <meta name=&quot;apple-mobile-web-app-title&quot; content=&quot;CodePen&quot;>
+
+    <link rel=&quot;shortcut icon&quot; type=&quot;image/x-icon&quot; href=&quot;https://cpwebassets.codepen.io/assets/favicon/favicon-aec34940fbc1a6e787974dcd360f2c6b63348d4b1f4e06c77743096d55480f33.ico&quot; />
+
+    <link rel=&quot;mask-icon&quot; type=&quot;image/x-icon&quot; href=&quot;https://cpwebassets.codepen.io/assets/favicon/logo-pin-b4b4269c16397ad2f0f7a01bcdf513a1994f4c94b8af2f191c09eb0d601762b1.svg&quot; color=&quot;#111&quot; />
+
+
+
+  
+    <script src=&quot;https://cpwebassets.codepen.io/assets/common/stopExecutionOnTimeout-2c7831bb44f98c1391d6a4ffda0e1fd302503391ca806e7fcc7b9b87197aec26.js&quot;></script>
+
+
+  <title>CodePen - Candy crush</title>
+
+    <link rel=&quot;canonical&quot; href=&quot;https://codepen.io/nirihx/pen/LYbeJWJ&quot;>
+  
+  
+  
+  
+<style>
+.grid {
+  height: 560px;
+  min-width: 560px;
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: 80px;
+  margin-top: 50px;
+  background-color: rgba(109, 127, 151, 0.5);
+  padding: 5px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) inset, 0 1px 0 #fff;
+  color: #85796b;
+}
+
+.grid div {
+  height: 70px;
+  width: 70px;
+}
+
+h3 {
+  font-family: &quot;Montserrat&quot;, sans-serif;
+  text-transform: uppercase;
+}
+
+h1 {
+  font-family: &quot;Montserrat&quot;, sans-serif;
+  text-transform: uppercase;
+  margin-top: -10px;
+}
+
+.invisible {
+  background-color: white;
+}
+
+body {
+  background-image: url('data:image/svg+xml,%3Csvg width=&quot;40&quot; height=&quot;40&quot; viewBox=&quot;0 0 40 40&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;%239C92AC&quot; fill-opacity=&quot;0.4&quot; fill-rule=&quot;evenodd&quot;%3E%3Cpath d=&quot;M0 40L40 0H20L0 20M40 40V20L20 40&quot;/%3E%3C/g%3E%3C/svg%3E');
+  max-width: 100vh;
+  display: flex;
+}
+
+.scoreContent {
+  background-color: cyan;
+  border-radius: 20px;
+  margin-top: 200px;
+  margin-left: 200px;
+  width: auto;
+  height: 120px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  color: #85796b;
+}
+</style>
+
+  <script>
+  window.console = window.console || function(t) {};
+</script>
+
+  
+  
+</head>
+
+<body translate=&quot;no&quot;>
+  <div class=&quot;scoreContent&quot;>
+    <h3>score</h3>
+    <h1 id=&quot;score&quot;></h1>
+</div>
+<div class=&quot;grid&quot;></div>
+  
+      <script id=&quot;rendered-js&quot; >
+document.addEventListener(&quot;DOMContentLoaded&quot;, () => {
+  candyCrushGame();
+});
+
+function candyCrushGame() {
+  const grid = document.querySelector(&quot;.grid&quot;);
+  const scoreDisplay = document.getElementById(&quot;score&quot;);
+  const width = 8;
+  const squares = [];
+  let score = 0;
+
+  const candyColors = [
+  &quot;url(https://raw.githubusercontent.com/kubowania/candy-crush/master/images/blue-candy.png)&quot;,
+  &quot;url(https://github.com/kubowania/candy-crush/blob/master/images/green-candy.png?raw=true)&quot;,
+  &quot;url(https://github.com/kubowania/candy-crush/blob/master/images/orange-candy.png?raw=true)&quot;,
+  &quot;url(https://github.com/kubowania/candy-crush/blob/master/images/purple-candy.png?raw=true)&quot;,
+  &quot;url(https://github.com/kubowania/candy-crush/blob/master/images/red-candy.png?raw=true)&quot;,
+  &quot;url(https://github.com/kubowania/candy-crush/blob/master/images/yellow-candy.png?raw=true)&quot;];
+
+
+  //create your board
+  function createBoard() {
+    for (let i = 0; i < width * width; i++) {
+      const square = document.createElement(&quot;div&quot;);
+      square.setAttribute(&quot;draggable&quot;, true);
+      square.setAttribute(&quot;id&quot;, i);
+      let randomColor = Math.floor(Math.random() * candyColors.length);
+      square.style.backgroundImage = candyColors[randomColor];
+      grid.appendChild(square);
+      squares.push(square);
+    }
+  }
+  createBoard();
+
+  // Dragging the Candy
+  let colorBeingDragged;
+  let colorBeingReplaced;
+  let squareIdBeingDragged;
+  let squareIdBeingReplaced;
+
+  squares.forEach((square) =>
+  square.addEventListener(&quot;dragstart&quot;, dragStart));
+
+  squares.forEach(square => square.addEventListener(&quot;dragend&quot;, dragEnd));
+  squares.forEach(square => square.addEventListener(&quot;dragover&quot;, dragOver));
+  squares.forEach((square) =>
+  square.addEventListener(&quot;dragenter&quot;, dragEnter));
+
+  squares.forEach((square) =>
+  square.addEventListener(&quot;drageleave&quot;, dragLeave));
+
+  squares.forEach(square => square.addEventListener(&quot;drop&quot;, dragDrop));
+
+  function dragStart() {
+    colorBeingDragged = this.style.backgroundImage;
+    squareIdBeingDragged = parseInt(this.id);
+    // this.style.backgroundImage = ''
+  }
+
+  function dragOver(e) {
+    e.preventDefault();
+  }
+
+  function dragEnter(e) {
+    e.preventDefault();
+  }
+
+  function dragLeave() {
+    this.style.backgroundImage = &quot;&quot;;
+  }
+
+  function dragDrop() {
+    colorBeingReplaced = this.style.backgroundImage;
+    squareIdBeingReplaced = parseInt(this.id);
+    this.style.backgroundImage = colorBeingDragged;
+    squares[
+    squareIdBeingDragged].
+    style.backgroundImage = colorBeingReplaced;
+  }
+
+  function dragEnd() {
+    //What is a valid move?
+    let validMoves = [
+    squareIdBeingDragged - 1,
+    squareIdBeingDragged - width,
+    squareIdBeingDragged + 1,
+    squareIdBeingDragged + width];
+
+    let validMove = validMoves.includes(squareIdBeingReplaced);
+
+    if (squareIdBeingReplaced &amp;&amp; validMove) {
+      squareIdBeingReplaced = null;
+    } else if (squareIdBeingReplaced &amp;&amp; !validMove) {
+      squares[
+      squareIdBeingReplaced].
+      style.backgroundImage = colorBeingReplaced;
+      squares[
+      squareIdBeingDragged].
+      style.backgroundImage = colorBeingDragged;
+    } else
+    squares[
+    squareIdBeingDragged].
+    style.backgroundImage = colorBeingDragged;
+  }
+
+  //drop candies once some have been cleared
+  function moveIntoSquareBelow() {
+    for (i = 0; i < 55; i++) {
+      if (squares[i + width].style.backgroundImage === &quot;&quot;) {
+        squares[i + width].style.backgroundImage =
+        squares[i].style.backgroundImage;
+        squares[i].style.backgroundImage = &quot;&quot;;
+        const firstRow = [0, 1, 2, 3, 4, 5, 6, 7];
+        const isFirstRow = firstRow.includes(i);
+        if (isFirstRow &amp;&amp; squares[i].style.backgroundImage === &quot;&quot;) {
+          let randomColor = Math.floor(
+          Math.random() * candyColors.length);
+
+          squares[i].style.backgroundImage = candyColors[randomColor];
+        }
+      }
+    }
+  }
+
+  ///Checking for Matches
+  //for row of Four
+  function checkRowForFour() {
+    for (i = 0; i < 60; i++) {
+      let rowOfFour = [i, i + 1, i + 2, i + 3];
+      let decidedColor = squares[i].style.backgroundImage;
+      const isBlank = squares[i].style.backgroundImage === &quot;&quot;;
+
+      const notValid = [
+      5,
+      6,
+      7,
+      13,
+      14,
+      15,
+      21,
+      22,
+      23,
+      29,
+      30,
+      31,
+      37,
+      38,
+      39,
+      45,
+      46,
+      47,
+      53,
+      54,
+      55];
+
+      if (notValid.includes(i)) continue;
+
+      if (
+      rowOfFour.every(
+      (index) =>
+      squares[index].style.backgroundImage === decidedColor &amp;&amp;
+      !isBlank))
+
+      {
+        score += 4;
+        scoreDisplay.innerHTML = score;
+        rowOfFour.forEach(index => {
+          squares[index].style.backgroundImage = &quot;&quot;;
+        });
+      }
+    }
+  }
+  checkRowForFour();
+
+  //for column of Four
+  function checkColumnForFour() {
+    for (i = 0; i < 39; i++) {
+      let columnOfFour = [i, i + width, i + width * 2, i + width * 3];
+      let decidedColor = squares[i].style.backgroundImage;
+      const isBlank = squares[i].style.backgroundImage === &quot;&quot;;
+
+      if (
+      columnOfFour.every(
+      (index) =>
+      squares[index].style.backgroundImage === decidedColor &amp;&amp;
+      !isBlank))
+
+      {
+        score += 4;
+        scoreDisplay.innerHTML = score;
+        columnOfFour.forEach(index => {
+          squares[index].style.backgroundImage = &quot;&quot;;
+        });
+      }
+    }
+  }
+  checkColumnForFour();
+
+  //for row of Three
+  function checkRowForThree() {
+    for (i = 0; i < 61; i++) {
+      let rowOfThree = [i, i + 1, i + 2];
+      let decidedColor = squares[i].style.backgroundImage;
+      const isBlank = squares[i].style.backgroundImage === &quot;&quot;;
+
+      const notValid = [
+      6,
+      7,
+      14,
+      15,
+      22,
+      23,
+      30,
+      31,
+      38,
+      39,
+      46,
+      47,
+      54,
+      55];
+
+      if (notValid.includes(i)) continue;
+
+      if (
+      rowOfThree.every(
+      (index) =>
+      squares[index].style.backgroundImage === decidedColor &amp;&amp;
+      !isBlank))
+
+      {
+        score += 3;
+        scoreDisplay.innerHTML = score;
+        rowOfThree.forEach(index => {
+          squares[index].style.backgroundImage = &quot;&quot;;
+        });
+      }
+    }
+  }
+  checkRowForThree();
+
+  //for column of Three
+  function checkColumnForThree() {
+    for (i = 0; i < 47; i++) {
+      let columnOfThree = [i, i + width, i + width * 2];
+      let decidedColor = squares[i].style.backgroundImage;
+      const isBlank = squares[i].style.backgroundImage === &quot;&quot;;
+
+      if (
+      columnOfThree.every(
+      (index) =>
+      squares[index].style.backgroundImage === decidedColor &amp;&amp;
+      !isBlank))
+
+      {
+        score += 3;
+        scoreDisplay.innerHTML = score;
+        columnOfThree.forEach(index => {
+          squares[index].style.backgroundImage = &quot;&quot;;
+        });
+      }
+    }
+  }
+  checkColumnForThree();
+
+  // Checks carried out indefintely - Add Butotn to clear interval for best practise
+  window.setInterval(function () {
+    checkRowForFour();
+    checkColumnForFour();
+    checkRowForThree();
+    checkColumnForThree();
+    moveIntoSquareBelow();
+  }, 100);
+}
+//# sourceURL=pen.js
+    </script>
+
+  
+</body>
+
+</html>
