@@ -1,5 +1,5 @@
-import {joinRoom, selfId} from 'https://esm.run/trystero@0.20.0'
-const config = {appId: 'test4341'}
+import {joinRoom} from 'https://esm.run/trystero@0.20.0'
+const config = {appId: 'xgfxgfxg'}
 let room
 
 
@@ -9,11 +9,18 @@ function init(n) {
     let getMove
     let getClick
   
-    room = joinRoom(config, 'room' + n);
+    room = joinRoom(config, 'dgfdghfdghvgfd' );
   
+   // room.error((e)=>{ console.log(e);});
     //byId('room-num').innerText = 'room #' + n
-    //room.onPeerJoin(addCursor)
+    room.onPeerJoin(addP)
     //room.onPeerLeave(removeCursor)
     //getMove(moveCursor)
     //getClick(dropFruit)
+  }
+
+
+  function addP(id, isSelf) {
+    console.log(id, isSelf);
+
   }
